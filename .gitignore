@@ -17,3 +17,12 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Large Model Weights & Checkpoints (Shared manually)
+*.pt
+*.bin
+*.safetensors
+*.pth
+*.onnx
+model_checkpoint.pt
+training_outputs/*.pt

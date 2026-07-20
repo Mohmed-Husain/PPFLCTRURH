@@ -1,0 +1,10 @@
+{
+  "model": "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext",
+  "num_epochs": 1,
+  "train_samples": 521,
+  "val_samples": 112,
+  "test_samples": 112,
+  "test_f1_micro": 0.34710743801652894,
+  "test_f1_macro": 0.07020386324034855,
+  "consistency_rate": 1.0
+}

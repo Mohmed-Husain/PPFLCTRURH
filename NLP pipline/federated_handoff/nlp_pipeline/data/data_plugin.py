@@ -118,6 +118,75 @@ class JSONDataPlugin(BaseDataPlugin):
 
 
 # ════════════════════════════════════════════════════════════════════
+# Concrete: JSON Lines files (e.g. dataset_transformed.jsonl)
+# ════════════════════════════════════════════════════════════════════
+
+class JSONLDataPlugin(BaseDataPlugin):
+    """
+    Load records from JSON Lines (.jsonl) files.
+
+    Parameters
+    ----------
+    filepath : str | Path
+        Path to a .jsonl file containing one JSON record per line.
+    text_key : str
+        Key for the text field in each record.
+    clean : bool
+        If *True*, apply ``clean_clinical_text`` to each record's text.
+    """
+
+    def __init__(
+        self,
+        filepath: str | Path,
+        text_key: str = "text",
+        clean: bool = False,
+    ) -> None:
+        self.filepath = Path(filepath)
+        self.text_key = text_key
+        self.clean = clean
+
+    def load_records(self) -> List[Dict[str, Any]]:
+        records: List[Dict[str, Any]] = []
+        with open(self.filepath, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                item = json.loads(line)
+                text = item.get(self.text_key, "")
+                if self.clean:
+                    text = clean_clinical_text(text)
+
+                parent_labels = item.get("parent_labels", [])
+                child_labels = item.get("child_labels", [])
+                labels = item.get("labels", parent_labels + child_labels)
+
+                doc_id = item.get("doc_id", item.get("id", ""))
+                patient_id = item.get("patient_id", doc_id)
+                admission_id = item.get("admission_id", doc_id)
+
+                records.append({
+                    "doc_id": doc_id,
+                    "text": text,
+                    "labels": labels,
+                    "parent_labels": parent_labels,
+                    "child_labels": child_labels,
+                    "patient_id": patient_id,
+                    "admission_id": admission_id,
+                    "split": item.get("split", "train"),
+                    "site_id": item.get("site_id", 0),
+                    "icd_codes": item.get("icd_codes", []),
+                })
+
+        return records
+
+    def __repr__(self) -> str:
+        return f"JSONLDataPlugin(filepath={self.filepath})"
+
+
+
+
+# ════════════════════════════════════════════════════════════════════
 # Concrete: MIMIC-IV placeholder
 # ════════════════════════════════════════════════════════════════════
 
